@@ -2,7 +2,7 @@
 	padding: 2rem;
 }
 
-.slider-wrapper {
+.top .slider-wrapper {
 	position: relative;
 	max-width: 48rem;
 	margin: 4rem 0 0 2rem;
@@ -16,8 +16,8 @@
 	scroll-behavior: smooth;
 	box-shadow: 0 1.5rem 3rem -0.75rem hsla(0, 0%, 0%, 0.25);
 	border-radius: 0.5rem;
-	-ms-overflow-style: none; 
-	scrollbar-width: none; 
+	-ms-overflow-style: none;
+	scrollbar-width: none;
 }
 
 .slider::-webkit-scrollbar {
@@ -58,5 +58,34 @@
 	opacity: 1;
 }
 
-/* --------- SIDE CARDS --------- */
+.top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
 
+.top_cards {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 6rem;
+}
+
+.card1,
+.card2 {
+    width: 28rem;
+    height: 17rem;
+    border-radius: 1rem;
+    box-shadow: 0 1.5rem 3rem -0.75rem hsla(0, 0%, 0%, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card1 {
+    background-color: #f29898;
+}
+
+.card2 {
+    background-color: #f2d499;
+}
