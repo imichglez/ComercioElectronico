@@ -1,19 +1,17 @@
 /* Google Fonts - Poppins */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
 }
-
 .nav {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  padding: 15px 200px;
+  padding: 8px 200px;
   background: #fff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -24,14 +22,18 @@
 }
 .nav {
   justify-content: space-between;
+  font-size: 16px;
 }
 a {
   color: #000;
   text-decoration: none;
 }
-.nav .logo {
-  font-size: 16px;
-  font-weight: 400;
+li{
+    padding-top: 1rem;
+}
+.logo{
+    font-size: 20px;
+    font-weight: 600;
 }
 .nav .nav-links {
   column-gap: 20px;
@@ -80,12 +82,10 @@ a {
   background-color: #fff;
   padding: 0 15px 0 45px;
 }
-
 .nav .navOpenBtn,
 .nav .navCloseBtn {
   display: none;
 }
-
 /* responsive */
 @media screen and (max-width: 1160px) {
   .nav {
