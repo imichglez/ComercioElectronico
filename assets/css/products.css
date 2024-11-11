@@ -1,8 +1,51 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
 
+/* ------- SHOPPING CART ------- */
+
+.border {
+    background-color: black !important;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%; 
+    border: none !important;
+    z-index: 1000;
+    margin-left: 75rem;
+    margin-top: -90px;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    cursor: pointer;
+}
+.cart-icon {
+    font-size: 40px;
+    color: #fff; 
+    cursor: pointer;
+}
+
+/* ------- PRODUCTS ------- */
+
 .products{
     margin-left: 4rem;
-    font-weight: 600;
     margin-top: 2rem;
     margin-bottom: 4rem;
+}
+
+h4{
+    font-weight: 700;
+    margin-left: 4rem;
+    margin-top: 2rem;
+}
+
+.cat1{
+    font-weight: 500;
+    font-size: 18px;
+    margin-left: 4rem;
+    margin-bottom: 4rem;
+}
+
+.mujer1, .mujer2 {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 2rem;
 }
