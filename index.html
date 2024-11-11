@@ -76,7 +76,7 @@
 
     <!--- SHOPPING CART --->
 
-    <section class="shopping_cart">
+    <section class="shopping_cart" onclick="">
         <div class="border">
             <i class="uil uil-shopping-cart cart-icon" id="cartIcon"></i>
         </div>
@@ -101,6 +101,25 @@
         }
 
         cargarProductos();
+    </script>
+
+    <!--- FOOTER --->
+
+    <div id="footer-container"></div>
+
+    <script>
+        // Cargar y mostrar el contenido de footer.html
+        async function cargarFooter() {
+            try {
+                const respuesta = await fetch('footer.html');
+                const contenido = await respuesta.text();
+                document.getElementById('footer-container').innerHTML = contenido;
+            } catch (error) {
+                console.error("Error al cargar el archivo:", error);
+            }
+        }
+
+        cargarFooter();
     </script>
 
     <!--- JS --->

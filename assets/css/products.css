@@ -52,7 +52,7 @@ h3{
     cursor: pointer;
 }
 
-.mujer1, .hombre1{
+.mujer1, .hombre1, .niños1{
     display: flex;
     gap: 2.5rem;
     margin-top: 2rem;
@@ -60,4 +60,20 @@ h3{
 
 .card{
     cursor: pointer;
+}
+
+
+/* ------- FOOTER ------- */
+
+.footer{
+    background-color: #a1a3a6;;
+    height: 280px;
+    color: #000;
+}
+
+.footer1{
+    font-weight: 500;
+    font-size: 18px;
+    margin-left: 4rem;
+    padding-top: 2rem;
 }
