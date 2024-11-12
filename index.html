@@ -25,13 +25,13 @@
 <body>
     <!--- NAV BAR --->
     <nav class="nav">
-        <a href="#" class="logo">Street Kicks</a>
+        <a href="#" class="logo" href="#" >Street Kicks</a>
         <ul class="nav-links">
           <i class="uil uil-times navCloseBtn"></i>
           <li><a href="#">Home</a></li>
-          <li><a href="#">Mujer</a></li>
-          <li><a href="#">Hombre</a></li>
-          <li><a href="#">Niños</a></li>
+          <li><a href="#mujer1">Mujer</a></li>
+          <li><a href="#hombre1">Hombre</a></li>
+          <li><a href="#niños1">Niños</a></li>
         </ul>
         <i class="uil uil-search search-icon" id="searchIcon"></i>
         <!--<i class="uil uil-shopping-cart cart-icon" id="cartIcon"></i> -->
@@ -62,6 +62,8 @@
             <div class="card1">
                 <p class="p">10% de descuento en</p>
                 <p class="p">productos seleccionados</p>
+                <p class="small_text">Renueva tus favoritos y ahorra mientras te llevas lo mejor</p>
+                <p class="small_text2">¡Solo por tiempo limitado!</p>
                 <button type="button" class="btn btn-dark">Compra aquí</button>
             </div>
             <div class="card2">
@@ -76,15 +78,21 @@
 
     <!--- SHOPPING CART --->
 
-    <section class="shopping_cart" onclick="">
+    <section class="shopping_cart">
         <div class="border">
-            <i class="uil uil-shopping-cart cart-icon" id="cartIcon"></i>
+            <i class="uil uil-shopping-cart cart-icon" id="cartIcon" onclick="openCart()"></i>
         </div>
     </section>
+    
+    <script>
+        function openCart() {
+            window.open('cart.html', '_blank');
+        }
+    </script>    
 
     <!--- PRODUCTS --->
-    <h3>Compra por categoría</h3>
-    <p class="cat1">Mujer</p>
+    <h3 id="buy">Compra por categoría</h3>
+    <p class="cat1" id="mujer1">Mujer</p>
 
     <div id="products-container"></div>
 

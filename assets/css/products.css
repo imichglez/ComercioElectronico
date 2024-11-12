@@ -42,14 +42,12 @@ h3{
     font-size: 18px;
     margin-left: 4rem;
     margin-bottom: 3rem;
-    cursor: pointer;
 }
 
 .cat2{
     font-weight: 500;
     font-size: 18px;
     margin-top: 2rem;
-    cursor: pointer;
 }
 
 .mujer1, .hombre1, .niños1{
@@ -62,18 +60,38 @@ h3{
     cursor: pointer;
 }
 
+.price{
+    margin-bottom: 4rem;
+}
+
+a{
+    margin-left: -10px;
+}
 
 /* ------- FOOTER ------- */
 
 .footer{
     background-color: #a1a3a6;;
-    height: 280px;
+    height: 250px;
     color: #000;
 }
 
 .footer1{
     font-weight: 500;
-    font-size: 18px;
+    font-size: 22px;
     margin-left: 4rem;
-    padding-top: 2rem;
+    padding-top: 4rem;
+}
+
+.icons{
+    font-size: 30px;
+    margin-left: 6rem;
+    cursor: pointer;
+}
+
+.small_text3{
+    font-weight: 200;
+    font-size: 11px;
+    margin-left: 4rem;
+    padding-top: 4rem;
 }
