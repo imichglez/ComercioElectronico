@@ -1,5 +1,3 @@
-//Conexión base de datos
-
 <?php
 
 class Database{

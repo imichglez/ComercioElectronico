@@ -1,6 +1,3 @@
-//Pagina de los detalles de los productos
-
-
 <?php
 
 require 'config/config.php';
