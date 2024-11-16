@@ -1,4 +1,4 @@
-//Funcionalidad del carrito
+
 
 <?php
 

@@ -1,5 +1,3 @@
-//Formas de Pago y Envío
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,8 +8,44 @@
 </head>
 <body>
 
-<div id="paypal-button-container"></div>
+<!-- Formulario de Envío -->
+<form action="guardar_envio.php" method="POST">
+  <h2>Datos de Envío</h2>
+  
+  <label for="nombre">Nombre:</label>
+  <input type="text" id="nombre" name="nombre" required><br>
 
+  <label for="apellidos">Apellidos:</label>
+  <input type="text" id="apellidos" name="apellidos" required><br>
+
+  <label for="calle">Calle:</label>
+  <input type="text" id="calle" name="calle" required><br>
+
+  <label for="numero">Número de la Casa:</label>
+  <input type="text" id="numero" name="numero" required><br>
+
+  <label for="pais">País:</label>
+  <input type="text" id="pais" name="pais" required><br>
+
+  <label for="ciudad">Ciudad:</label>
+  <input type="text" id="ciudad" name="ciudad" required><br>
+
+  <label for="codigo_postal">Código Postal:</label>
+  <input type="text" id="codigo_postal" name="codigo_postal" required><br>
+
+  <label for="correo">Correo Electrónico:</label>
+  <input type="email" id="correo" name="correo" required><br>
+
+  <label for="telefono">Número de Teléfono:</label>
+  <input type="tel" id="telefono" name="telefono" required><br>
+
+  <button type="submit">Guardar Datos de Envío</button>
+</form>
+
+
+<hr>
+
+<!-- Resumen de Pago -->
 <?php
 $servername = "localhost";
 $username = "root";
@@ -38,40 +72,54 @@ if ($precio === null) {
     die("Error: No se pudo recuperar el precio del producto.");
 }
 
-$precio_final = $precio;
+$precio_descuento = $precio;
 if ($descuento > 0) {
-    $precio_final = $precio - ($precio * ($descuento / 100));
+    $precio_descuento = $precio - ($precio * ($descuento / 100));
 }
 
+$envio = 10;
+$precio_final = $precio_descuento + $envio;
+
+$precio_descuento = number_format($precio_descuento, 2, '.', '');
 $precio_final = number_format($precio_final, 2, '.', '');
 ?>
 
+<h3>Resumen de Pago</h3>
+<p>Precio del Producto: $<?php echo number_format($precio, 2); ?></p>
+<p>Descuento: <?php echo $descuento; ?>%</p>
+<p>Precio con Descuento: $<?php echo $precio_descuento; ?></p>
+<p>Costo de Envío: $<?php echo $envio; ?></p>
+<p><strong>Total a Pagar: $<?php echo $precio_final; ?></strong></p>
+
+<hr>
+
+<!-- Botón de Pago -->
+<div id="paypal-button-container"></div>
+
 <script>
     paypal.Buttons({
-        style:{
+        style: {
             color: 'blue',
             shape: 'pill',
             label: 'pay'
         },
-        createOrder: function(data, actions){
+        createOrder: function(data, actions) {
             return actions.order.create({
                 purchase_units: [{
-                  amount: {
-                    value: "<?php echo $precio_final; ?>"
-                  }
+                    amount: {
+                        value: "<?php echo $precio_final; ?>"
+                    }
                 }]
             });
         },
-
-        onApprove: function(data, actions){
-          actions.order.capture().then(function (detalles){
-              console.log(detalles);
-              alert("Pago realizado correctamente");
-          });
+        onApprove: function(data, actions) {
+            actions.order.capture().then(function(detalles) {
+                console.log(detalles);
+                alert("Pago realizado correctamente");
+            });
         },
-
-        onCancel: function(data){
-          alert("Pago Cancelado");
+        onCancel: function(data) {
+            alert("Pago Cancelado");
         }
     }).render('#paypal-button-container');
 </script>
