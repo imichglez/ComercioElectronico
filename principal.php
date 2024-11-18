@@ -5,7 +5,7 @@ require 'config/database.php';
 $db = new Database();
 $con = $db->conectar();
 
-$sql = $con->prepare("SELECT id, nombre, precio, descuento FROM zapatillas WHERE activo=1");
+$sql = $con->prepare("SELECT id, nombre, precio, descuento, id_categoria FROM zapatillas WHERE activo=1");
 $sql->execute();
 $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
 
@@ -70,17 +70,39 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
     <main>
         <div class="container my-4">
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-                <?php foreach ($resultado as $row) { ?>
+                <?php foreach ($resultado as $row) { 
+                    $id = $row['id'];
+                    
+                    // Determinar la carpeta principal según la categoría
+                    if (in_array($row['id_categoria'], [1, 2])) {
+                        $carpeta_principal = 'hombre';
+                    } elseif (in_array($row['id_categoria'], [3, 4])) {
+                        $carpeta_principal = 'mujer';
+                    } elseif (in_array($row['id_categoria'], [5, 6])) {
+                        $carpeta_principal = 'niños';
+                    } else {
+                        $carpeta_principal = 'desconocido';
+                    }
+
+                    // Determinar la subcarpeta (casual o running)
+                    if (in_array($row['id_categoria'], [1, 3, 5])) {
+                        $subcarpeta = 'casual';
+                    } elseif (in_array($row['id_categoria'], [2, 4, 6])) {
+                        $subcarpeta = 'running';
+                    } else {
+                        $subcarpeta = 'general';
+                    }
+
+                    // Ruta de la imagen
+                    $imagen = "imagenes/$carpeta_principal/$subcarpeta/" . $id . "/prueba.png";
+
+                    // Si no existe la imagen, usar una predeterminada
+                    if (!file_exists($imagen)) {
+                        $imagen = "imagenes/nofoto.avif";
+                    }
+                ?>
                     <div class="col">
                         <div class="card shadow-sm">
-                            <?php
-                            $id = $row['id'];
-                            $imagen = "imagenes/hombre/casual/" . $id . "/prueba.png";
-
-                            if (!file_exists($imagen)) {
-                                $imagen = "imagenes/nofoto.avif";
-                            }
-                            ?>
                             <img src="<?php echo $imagen; ?>" class="card-img-top" alt="<?php echo $row['nombre']; ?>">
                             <div class="card-body">
                                 <h5 class="card-title"><?php echo $row['nombre']; ?></h5>

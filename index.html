@@ -25,14 +25,14 @@
 <body>
     <!--- NAV BAR --->
     <nav class="nav">
-        <a href="#" class="logo" href="#" >Street Kicks</a>
+        <a href="index.html" class="logo" href="#" >Street Kicks</a>
         <ul class="nav-links">
           <i class="uil uil-times navCloseBtn"></i>
-          <li><a href="#">Home</a></li>
+          <li><a href="index.html">Home</a></li>
           <li><a href="#mujer1">Mujer</a></li>
           <li><a href="#hombre1">Hombre</a></li>
           <li><a href="#niños1">Niños</a></li>
-          <li><a href="">Catálogo</a></li>
+          <li><a href="principal.php">Catálogo</a></li>
         </ul>
         <i class="uil uil-search search-icon" id="searchIcon"></i>
         <!--<i class="uil uil-shopping-cart cart-icon" id="cartIcon"></i> -->
@@ -59,20 +59,21 @@
             </div>
         </section>
     
+    
         <section class="top_cards">
             <div class="card1">
                 <p class="p">10% de descuento en</p>
                 <p class="p">productos seleccionados</p>
                 <p class="small_text">Renueva tus favoritos y ahorra mientras te llevas lo mejor</p>
                 <p class="small_text2">¡Solo por tiempo limitado!</p>
-                <button type="button" class="btn btn-dark">Compra aquí</button>
+                <button type="button" class="btn btn-dark" onclick="window.location.href='principal.php'">Compra aquí</button>
             </div>
             <div class="card2">
                 <p class="p">¡Se acerca el</p>
                 <p class="p">BLACK FRIDAY!</p>
                 <p class="small_text">Aprovecha todas las ofertas</p>
                 <p class="small_text2">especiales solo para ti</p>
-                <button type="button" class="btn btn-light">Compra aquí</button>
+                <button type="button" class="btn btn-light" onclick="window.location.href='principal.php'">Compra aquí</button>
             </div>
         </section>
     </section>
@@ -87,7 +88,7 @@
     
     <script>
         function openCart() {
-            window.open('products.html', '_blank');
+            window.open('checkout.php', '_blank');
         }
     </script>    
 
