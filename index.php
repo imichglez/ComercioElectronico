@@ -78,39 +78,6 @@
     #paypal-button-container {
       margin-top: 20px;
     }
-    /* Estilo del modal */
-    .modal {
-      display: none; /* Ocultar por defecto */
-      position: fixed;
-      z-index: 1;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background-color: white;
-      padding: 30px;
-      border-radius: 8px;
-      text-align: center;
-      width: 300px;
-    }
-    .modal button {
-      background-color: #000;
-      color: #fff;
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 4px;
-      margin: 10px;
-      cursor: pointer;
-    }
-    .modal button:hover {
-      background-color: #444;
-    }
   </style>
 </head>
 <body>
@@ -120,136 +87,76 @@
   <div class="form-container">
     <h2>Datos de Envío</h2>
     <form id="shipping-form" action="guardar_envio.php" method="POST">
+      <!-- Campos del formulario de envío -->
       <label for="nombre">Nombre:</label>
       <input type="text" id="nombre" name="nombre" required>
-
       <label for="apellidos">Apellidos:</label>
       <input type="text" id="apellidos" name="apellidos" required>
-
       <label for="calle">Calle:</label>
       <input type="text" id="calle" name="calle" required>
-
       <label for="numero">Número:</label>
       <input type="text" id="numero" name="numero" required>
-
       <label for="pais">País:</label>
       <input type="text" id="pais" name="pais" required>
-
       <label for="ciudad">Ciudad:</label>
       <input type="text" id="ciudad" name="ciudad" required>
-
       <label for="codigo_postal">Código Postal:</label>
       <input type="text" id="codigo_postal" name="codigo_postal" required>
-
       <label for="correo">Correo Electrónico:</label>
       <input type="email" id="correo" name="correo" required>
-
       <label for="telefono">Número de Teléfono:</label>
       <input type="tel" id="telefono" name="telefono" required>
-
-      <!-- Campos opcionales -->
-      <label for="piso_departamento">Piso/Departamento (Opcional):</label>
-      <input type="text" id="piso_departamento" name="piso_departamento">
-
-      <label for="provincia">Provincia/Municipio (Opcional):</label>
-      <input type="text" id="provincia" name="provincia">
-
-      <button type="submit" id="submit-button" style="display:none;">Guardar Datos de Envío</button>
     </form>
   </div>
 
   <!-- Resumen de Pago -->
   <div class="summary-container">
     <?php
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "e_commerce";
+    session_start();
+    require 'config/config.php';
+    require 'config/database.php';
 
-    $conn = new mysqli($servername, $username, $password, $dbname);
+    $db = new Database();
+    $con = $db->conectar();
 
-    if ($conn->connect_error){
-      die("Error de conexión: " . $conn->connect_error);
+    $productos = isset($_SESSION['carrito']['productos']) ? $_SESSION['carrito']['productos'] : null;
+
+    $total = 0;
+
+    if ($productos != null) {
+        foreach ($productos as $id => $cantidad) {
+            $sql = $con->prepare("SELECT precio, descuento FROM zapatillas WHERE id = ?");
+            $sql->execute([$id]);
+            $row = $sql->fetch(PDO::FETCH_ASSOC);
+
+            $precio_descuento = $row['precio'] - ($row['precio'] * ($row['descuento'] / 100));
+            $subtotal = $cantidad * $precio_descuento;
+            $total += $subtotal;
+        }
     }
 
-    $id = 5;
-    $sql = "SELECT precio, descuento FROM zapatillas WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->bind_result($precio, $descuento);
-    $stmt->fetch();
-    $stmt->close();
-    $conn->close();
+    $costo_envio = 10; // Costo de envío fijo
+    $total += $costo_envio;
 
-    $precio_descuento = $precio - ($precio * ($descuento / 100));
-    $envio = 10;
-    $precio_final = $precio_descuento + $envio;
-
-    $precio_descuento = number_format($precio_descuento, 2, '.', '');
-    $precio_final = number_format($precio_final, 2, '.', '');
+    $total = number_format($total, 2, '.', '');
     ?>
     <div class="summary-title">Resumen de Pago</div>
     <div class="summary-item">
-      <span>Precio del Producto:</span>
-      <span>$<?php echo number_format($precio, 2); ?></span>
-    </div>
-    <div class="summary-item">
-      <span>Descuento:</span>
-      <span><?php echo $descuento; ?>%</span>
-    </div>
-    <div class="summary-item">
-      <span>Precio con Descuento:</span>
-      <span>$<?php echo $precio_descuento; ?></span>
+      <span>Total de Productos:</span>
+      <span>$<?php echo number_format($total - $costo_envio, 2); ?></span>
     </div>
     <div class="summary-item">
       <span>Costo de Envío:</span>
-      <span>$<?php echo $envio; ?></span>
+      <span>$<?php echo $costo_envio; ?></span>
     </div>
     <div class="summary-total">
-      Total a Pagar: <span>$<?php echo $precio_final; ?></span>
+      Total a Pagar: <span>$<?php echo $total; ?></span>
     </div>
     <div id="paypal-button-container"></div>
   </div>
 </div>
 
-<!-- Detalles de Envío -->
-<div class="shipping-details">
-  <h3>Detalles de Envío</h3>
-  <p>La fecha estimada de llegada de tu paquete es entre el <strong>24 y 25 de noviembre</strong>.</p>
-</div>
-
-<!-- Modal de Confirmación -->
-<div id="confirmation-modal" class="modal">
-  <div class="modal-content">
-    <h2>¡Compra Confirmada!</h2>
-    <p>Tu pago ha sido procesado correctamente.</p>
-    <button onclick="window.location.href='index.html'">Ir a la tienda</button>
-    <button onclick="window.location.href='detalles_envio.html'">Ver detalles de envío</button>
-  </div>
-</div>
-
 <script>
-  document.getElementById('shipping-form').addEventListener('submit', function(event) {
-    let fields = ['nombre', 'apellidos', 'calle', 'numero', 'pais', 'ciudad', 'codigo_postal', 'correo', 'telefono'];
-    let isValid = true;
-
-    fields.forEach(function(field) {
-      let input = document.getElementById(field);
-      if (!input.value) {
-        isValid = false;
-        input.style.borderColor = 'red';
-      } else {
-        input.style.borderColor = '';
-      }
-    });
-
-    if (!isValid) {
-      alert('Por favor, completa todos los campos obligatorios.');
-      event.preventDefault();
-    }
-  });
-
   paypal.Buttons({
     style: {
       color: 'blue',
@@ -260,19 +167,20 @@
       return actions.order.create({
         purchase_units: [{
           amount: {
-            value: "<?php echo $precio_final; ?>"
+            value: "<?php echo $total; ?>"
           }
         }]
       });
     },
     onApprove: function(data, actions) {
-      actions.order.capture().then(function(details) {
-        console.log(details);
-        document.getElementById('confirmation-modal').style.display = 'flex';
+      return actions.order.capture().then(function(details) {
+        alert('Pago exitoso: ' + details.payer.name.given_name);
+        // Redirigir a la página de confirmación
+        window.location.href = 'confirmacion.php';
       });
     },
     onCancel: function(data) {
-      alert("Pago Cancelado");
+      alert('Pago cancelado');
     }
   }).render('#paypal-button-container');
 </script>

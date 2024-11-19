@@ -57,7 +57,18 @@ if ($id == '' || $token == '') {
     <title><?php echo $nombre; ?> - Tienda Online</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
     <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+
         .product-image {
             max-width: 100%;
             height: auto;
@@ -99,27 +110,107 @@ if ($id == '' || $token == '') {
         .lead {
             font-size: 1.2rem;
             color: #6c757d;
+            text-align: justify;
         }
 
         .product-container {
             margin-top: 30px;
         }
+
+        /* Navbar styles */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 15px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .nav .search-box {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav .search-box input {
+            width: 200px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        .nav .search-box button {
+            margin-left: 5px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+        }
+
+        .nav .cart-icon {
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 20px;
+        }
+
+        .nav .login-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
-    <header>
-        <div class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a href="index.html" class="navbar-brand">
-                    <strong>Tienda Online</strong>
-                </a>
-                <a href="carrito.php" class="btn btn-primary">
-                    Carrito <span id="num_cart" class="badge bg-secondary"><?php echo $num_cart; ?></span>
-                </a>
-            </div>
+    <!-- Navbar -->
+    <nav class="nav">
+        <a href="index.html" class="logo">Street Kicks</a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="principal.php">Catálogo</a></li>
+        </ul>
+        <div class="search-box">
+            <form action="buscar.php" method="GET">
+                <input type="text" name="query" class="form-control" placeholder="Buscar productos" required>
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </form>
         </div>
-    </header>
+        <div class="cart-icon" onclick="window.location.href='checkout.php'">
+            <i class="uil uil-shopping-cart"></i>
+        </div>
+        <div class="login-icon" onclick="window.location.href='login.php'">
+            <i class="uil uil-user-circle"></i>
+        </div>
+    </nav>
 
     <main>
         <div class="container product-container">
@@ -153,13 +244,18 @@ if ($id == '' || $token == '') {
 
                     <!-- Botones -->
                     <div class="d-grid gap-3 col-10 mx-auto">
-                        <button class="btn btn-primary btn-lg" type="button">Comprar ahora</button>
+                        <button class="btn btn-primary btn-lg" type="button" onclick="window.location.href='index.php'">Comprar ahora</button>
                         <button class="btn btn-outline-primary btn-lg" type="button" onclick="addProducto(<?php echo $id; ?>, '<?php echo $token_tmp; ?>')">Agregar al carrito</button>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; <?php echo date("Y"); ?> Street Kicks. Todos los derechos reservados.</p>
+    </footer>
 
     <script>
         function addProducto(id, token) {
