@@ -20,9 +20,62 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
     <title>Tienda Online</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Unicons CSS -->
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+
     <style>
+        /* Navbar styles */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 15px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .nav .cart-icon {
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 20px;
+            position: relative;
+        }
+
+        .nav .cart-icon .badge {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            font-size: 0.8rem;
+            padding: 5px;
+        }
+
+        /* Product card styles */
         .card img {
-            height: 200px;
+            height: 250px;
             object-fit: cover;
         }
 
@@ -50,30 +103,49 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
             border-radius: 5px;
             padding: 2px 5px;
         }
+
+        /* Footer styles */
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
-    <header>
-        <div class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a href="#" class="navbar-brand">
-                    <strong>Tienda Online</strong>
-                </a>
-                <a href="checkout.php" class="btn btn-primary">
-                    Carrito <span id="num_cart" class="badge bg-secondary"><?php echo $num_cart; ?></span>
-                </a>
-            </div>
+    <!-- Navbar -->
+    <nav class="nav">
+        <a href="index.html" class="logo">Street Kicks</a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="principal.php">Catálogo</a></li>
+        </ul>
+        <div class="search-box">
+            <form action="buscar.php" method="GET" class="d-flex">
+                <input type="text" name="query" class="form-control" placeholder="Buscar productos" required />
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </form>
         </div>
-    </header>
+        <div class="cart-icon" onclick="window.location.href='checkout.php'">
+            <i class="uil uil-shopping-cart"></i>
+            <span id="num_cart" class="badge bg-secondary">
+                <?php echo isset($_SESSION['carrito']['productos']) ? array_sum($_SESSION['carrito']['productos']) : 0; ?>
+            </span>
+        </div>
+        <div class="login-icon" onclick="window.location.href='login.php'">
+            <i class="uil uil-user-circle"></i>
+        </div>
+    </nav>
 
+    <!-- Main Content -->
     <main>
         <div class="container my-4">
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-                <?php foreach ($resultado as $row) { 
+                <?php foreach ($resultado as $row) {
                     $id = $row['id'];
-                    
-                    // Determinar la carpeta principal según la categoría
+
+                    // Determine main folder based on category
                     if (in_array($row['id_categoria'], [1, 2])) {
                         $carpeta_principal = 'hombre';
                     } elseif (in_array($row['id_categoria'], [3, 4])) {
@@ -84,7 +156,7 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                         $carpeta_principal = 'desconocido';
                     }
 
-                    // Determinar la subcarpeta (casual o running)
+                    // Determine subfolder (casual or running)
                     if (in_array($row['id_categoria'], [1, 3, 5])) {
                         $subcarpeta = 'casual';
                     } elseif (in_array($row['id_categoria'], [2, 4, 6])) {
@@ -93,10 +165,10 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                         $subcarpeta = 'general';
                     }
 
-                    // Ruta de la imagen
+                    // Image path
                     $imagen = "imagenes/$carpeta_principal/$subcarpeta/" . $id . "/prueba.png";
 
-                    // Si no existe la imagen, usar una predeterminada
+                    // Use a default image if the file does not exist
                     if (!file_exists($imagen)) {
                         $imagen = "imagenes/nofoto.avif";
                     }
@@ -126,6 +198,11 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
     </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; <?php echo date("Y"); ?> Street Kicks. Todos los derechos reservados.</p>
+    </footer>
 
     <script>
         function addProducto(id, token) {

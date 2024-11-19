@@ -18,14 +18,27 @@ if ($id == '' || $token == '') {
         $sql = $con->prepare("SELECT count(id) FROM zapatillas WHERE id=? and activo=1");
         $sql->execute([$id]);
         if ($sql->fetchColumn() > 0) {
-            $sql = $con->prepare("SELECT nombre, descripcion, precio, descuento FROM zapatillas WHERE id=? and activo=1 LIMIT 1");
+            $sql = $con->prepare("SELECT nombre, descripcion, precio, descuento, id_categoria FROM zapatillas WHERE id=? and activo=1 LIMIT 1");
             $sql->execute([$id]);
             $row = $sql->fetch(PDO::FETCH_ASSOC);
             $nombre = $row['nombre'];
             $descripcion = $row['descripcion'];
             $precio = $row['precio'];
             $descuento = $row['descuento'];
+            $id_categoria = $row['id_categoria'];
             $precio_desc = $precio - (($precio * $descuento) / 100);
+
+            // Determinar la carpeta principal y subcarpeta
+            $carpeta_principal = in_array($id_categoria, [1, 2]) ? 'hombre' : (in_array($id_categoria, [3, 4]) ? 'mujer' : 'niños');
+            $subcarpeta = in_array($id_categoria, [1, 3, 5]) ? 'casual' : 'running';
+
+            // Ruta de la imagen
+            $imagen = "imagenes/$carpeta_principal/$subcarpeta/$id/prueba.png";
+
+            // Verificar si la imagen existe
+            if (!file_exists($imagen)) {
+                $imagen = "imagenes/nofoto.avif";
+            }
         }
     } else {
         echo 'Error al procesar la petición';
@@ -98,7 +111,7 @@ if ($id == '' || $token == '') {
     <header>
         <div class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a href="#" class="navbar-brand">
+                <a href="index.html" class="navbar-brand">
                     <strong>Tienda Online</strong>
                 </a>
                 <a href="carrito.php" class="btn btn-primary">
@@ -113,7 +126,7 @@ if ($id == '' || $token == '') {
             <div class="row">
                 <!-- Imagen del producto -->
                 <div class="col-md-6">
-                    <img src="imagenes/hombre/casual/<?php echo $id; ?>/prueba.png" class="product-image" alt="<?php echo $nombre; ?>">
+                    <img src="<?php echo $imagen; ?>" class="product-image" alt="<?php echo $nombre; ?>">
                 </div>
 
                 <!-- Información del producto -->
