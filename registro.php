@@ -10,6 +10,7 @@ $con = $db->conectar();
 $errors = [];
 $emailError = '';
 $usuarioError = '';
+$telefonoError = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitización de los campos
@@ -21,42 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = isset($_POST['password']) ? trim($_POST['password']) : null;
     $repassword = isset($_POST['repassword']) ? trim($_POST['repassword']) : null;
 
-    // Validación de campos requeridos
-    if (!$nombres || !$apellidos || !$email || !$telefono || !$usuario || !$password || !$repassword) {
-        $errors[] = "Todos los campos son obligatorios.";
-    }
-
-    // Validación del correo electrónico
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $emailError = "El formato del correo electrónico no es válido.";
-    }
-
-    // Validación del número de teléfono
-    if (!preg_match('/^\+?[0-9]{10,15}$/', $telefono)) {
-        $errors[] = "El número de teléfono no es válido.";
-    }
-
-    // Validación de contraseñas
-    if ($password !== $repassword) {
-        $errors[] = "Las contraseñas no coinciden.";
-    }
-    if (strlen($password) < 8) {
-        $errors[] = "La contraseña debe tener al menos 8 caracteres.";
-    }
-    if (!preg_match('/[A-Z]/', $password)) {
-        $errors[] = "La contraseña debe incluir al menos una letra mayúscula.";
-    }
-    if (!preg_match('/[a-z]/', $password)) {
-        $errors[] = "La contraseña debe incluir al menos una letra minúscula.";
-    }
-    if (!preg_match('/[0-9]/', $password)) {
-        $errors[] = "La contraseña debe incluir al menos un número.";
-    }
-    if (!preg_match('/[\W]/', $password)) {
-        $errors[] = "La contraseña debe incluir al menos un carácter especial.";
-    }
-
-    // Validar unicidad del correo y usuario
+    // Validar unicidad del correo, usuario y teléfono
     $sql = $con->prepare("SELECT COUNT(*) FROM usuarios WHERE usuario = ?");
     $sql->execute([$usuario]);
     if ($sql->fetchColumn() > 0) {
@@ -69,8 +35,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $emailError = "El correo electrónico ya está registrado.";
     }
 
-    // Si no hay errores, registrar al cliente y usuario
-    if (count($errors) === 0 && !$emailError && !$usuarioError) {
+    $sql = $con->prepare("SELECT COUNT(*) FROM clientes WHERE telefono = ?");
+    $sql->execute([$telefono]);
+    if ($sql->fetchColumn() > 0) {
+        $telefonoError = "El número de teléfono ya está registrado.";
+    }
+
+    // Si no hay errores de unicidad, registrar al cliente y usuario
+    if (!$emailError && !$usuarioError && !$telefonoError) {
         // Registro del cliente
         $id = registraCliente([$nombres, $apellidos, $email, $telefono], $con);
 
@@ -80,7 +52,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token = generarToken();
 
             if (registraUsuario([$usuario, $pass_hash, $token, $id], $con)) {
-                echo "<div class='alert alert-success'>Registro exitoso.</div>";
+                // Iniciar sesión automáticamente
+                session_start();
+                $_SESSION['id_usuario'] = $con->lastInsertId(); // ID del usuario insertado
+                $_SESSION['id_cliente'] = $id;
+                $_SESSION['nombre'] = $nombres;
+                $_SESSION['apellido'] = $apellidos;
+
+                // Redirigir a la página principal
+                echo "<script>alert('Registro exitoso. Redirigiendo a la página principal.');</script>";
+                echo "<script>window.location.href = 'index.html';</script>";
+                exit;
             } else {
                 $errors[] = "Error al registrar usuario.";
             }
@@ -89,15 +71,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda Online</title>
+    <title>Street Kicks - Registro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .error-message {
@@ -108,68 +90,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .is-invalid {
             border-color: red;
         }
+
+        /* Aseguramos que el footer siempre esté al final */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
-    <header>
-        <div class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a href="#" class="navbar-brand"><strong>Tienda Online</strong></a>
-                <a href="checkout.php" class="btn btn-primary">
-                    Carrito <span id="num_cart" class="badge bg-secondary">0</span>
-                </a>
-            </div>
-        </div>
-    </header>
-
     <main>
-        <div class="container mt-4">
-            <h2>Datos del cliente</h2>
+        <div class="container mt-5">
+            <h2 class="text-center">Registro</h2>
 
-            <form class="row g-3" action="registro.php" method="post" autocomplete="off" id="formRegistro">
-                <div class="col-md-6">
-                    <label for="nombres"><span class="text-danger">*</span>Nombres</label>
-                    <input type="text" name="nombres" id="nombres" class="form-control" value="<?php echo htmlspecialchars($nombres ?? ''); ?>" required>
+            <form id="formRegistro" class="mt-4" method="POST" action="registro.php">
+                <div class="mb-3">
+                    <label for="nombres">Nombres</label>
+                    <input type="text" name="nombres" id="nombres" class="form-control" required>
                     <div id="nombres-error" class="error-message"></div>
                 </div>
-                <div class="col-md-6">
-                    <label for="apellidos"><span class="text-danger">*</span>Apellidos</label>
-                    <input type="text" name="apellidos" id="apellidos" class="form-control" value="<?php echo htmlspecialchars($apellidos ?? ''); ?>" required>
+                <div class="mb-3">
+                    <label for="apellidos">Apellidos</label>
+                    <input type="text" name="apellidos" id="apellidos" class="form-control" required>
                     <div id="apellidos-error" class="error-message"></div>
                 </div>
-                <div class="col-md-6">
-                    <label for="email"><span class="text-danger">*</span>Correo Electrónico</label>
-                    <input type="email" name="email" id="email" class="form-control <?php echo $emailError ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($email ?? ''); ?>" required>
+                <div class="mb-3">
+                    <label for="email">Correo Electrónico</label>
+                    <input type="email" name="email" id="email" class="form-control <?php echo $emailError ? 'is-invalid' : ''; ?>" required>
                     <div id="email-error" class="error-message"><?php echo $emailError; ?></div>
                 </div>
-                <div class="col-md-6">
-                    <label for="telefono"><span class="text-danger">*</span>Teléfono</label>
-                    <input type="tel" name="telefono" id="telefono" class="form-control" value="<?php echo htmlspecialchars($telefono ?? ''); ?>" required>
-                    <div id="telefono-error" class="error-message"></div>
+                <div class="mb-3">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" name="telefono" id="telefono" class="form-control <?php echo $telefonoError ? 'is-invalid' : ''; ?>" required>
+                    <div id="telefono-error" class="error-message"><?php echo $telefonoError; ?></div>
                 </div>
-                <div class="col-md-6">
-                    <label for="usuario"><span class="text-danger">*</span>Usuario</label>
-                    <input type="text" name="usuario" id="usuario" class="form-control <?php echo $usuarioError ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($usuario ?? ''); ?>" required>
+                <div class="mb-3">
+                    <label for="usuario">Usuario</label>
+                    <input type="text" name="usuario" id="usuario" class="form-control <?php echo $usuarioError ? 'is-invalid' : ''; ?>" required>
                     <div id="usuario-error" class="error-message"><?php echo $usuarioError; ?></div>
                 </div>
-                <div class="col-md-6">
-                    <label for="password"><span class="text-danger">*</span>Contraseña</label>
+                <div class="mb-3">
+                    <label for="password">Contraseña</label>
                     <input type="password" name="password" id="password" class="form-control" required>
                     <div id="password-error" class="error-message"></div>
                 </div>
-                <div class="col-md-6">
-                    <label for="repassword"><span class="text-danger">*</span>Repetir Contraseña</label>
+                <div class="mb-3">
+                    <label for="repassword">Confirmar Contraseña</label>
                     <input type="password" name="repassword" id="repassword" class="form-control" required>
                     <div id="repassword-error" class="error-message"></div>
                 </div>
-
-                <div class="col-12">
+                <div class="d-grid">
                     <button type="submit" class="btn btn-primary">Registrar</button>
                 </div>
             </form>
         </div>
     </main>
+
+    <footer>
+        <p>&copy; <?php echo date("Y"); ?> Tienda Online. Todos los derechos reservados.</p>
+    </footer>
 
     <script>
         const form = document.getElementById('formRegistro');

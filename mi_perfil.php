@@ -70,7 +70,7 @@ if (!$cliente) {
             <strong>Teléfono:</strong> <?php echo htmlspecialchars($cliente['telefono']); ?>
         </div>
         <div class="mt-4">
-            <a href="index.php" class="btn btn-primary">Volver a la tienda</a>
+            <a href="index.html" class="btn btn-primary">Volver a la tienda</a>
         </div>
     </div>
 </body>
