@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['apellido'] = $usuario['apellidos'];
 
                     // Redirige al usuario al carrito o página principal
-                    header('Location: detalles_compra.php');
+                    header('Location: index.html');
                     exit;
                 } else {
                     $error = "La contraseña es incorrecta.";

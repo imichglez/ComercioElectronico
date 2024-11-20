@@ -55,10 +55,42 @@
         }
 
         .nav .login-icon {
+            position: relative;
             display: flex;
             align-items: center;
             cursor: pointer;
             font-size: 24px;
+        }
+
+        .nav .dropdown-menu {
+            position: absolute;
+            top: 40px;
+            right: 0;
+            background: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            display: none;
+            flex-direction: column;
+            width: 200px;
+            z-index: 1000;
+        }
+
+        .nav .dropdown-menu a {
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
+            display: block;
+            text-align: center;
+        }
+
+        .nav .dropdown-menu a:hover {
+            background: #f8f9fa;
+        }
+
+        .slider img {
+            width: 100%;
+            height: 600px;
+            object-fit: cover;
         }
 
         .top_slider .slider-wrapper {
@@ -69,12 +101,6 @@
         .slider-wrapper .slider {
             display: flex;
             overflow: hidden;
-        }
-
-        .slider img {
-            width: 100%;
-            height: 600px; /* Ajuste del tamaño grande */
-            object-fit: cover;
         }
 
         .slider-nav {
@@ -108,30 +134,47 @@
             background-color: #0056b3;
             color: white;
         }
+
+        .nav .login-icon:hover .dropdown-menu {
+            display: flex;
+        }
     </style>
 </head>
 
 <body>
+    <?php session_start(); ?>
     <!--- NAV BAR --->
     <nav class="nav">
         <a href="index.html" class="logo">Street Kicks</a>
         <ul class="nav-links">
-            <i class="uil uil-times navCloseBtn"></i>
             <li><a href="index.html">Home</a></li>
             <li><a href="#mujer1">Mujer</a></li>
             <li><a href="#hombre1">Hombre</a></li>
             <li><a href="#niños1">Niños</a></li>
             <li><a href="principal.php">Catálogo</a></li>
         </ul>
-        <i class="uil uil-search search-icon" id="searchIcon"></i>
         <div class="search-box">
             <form action="buscar.php" method="GET" class="d-flex">
                 <input type="text" name="query" class="form-control" placeholder="Buscar productos" required />
                 <button type="submit" class="btn btn-primary">Buscar</button>
             </form>
         </div>
-        <div class="login-icon" onclick="window.location.href='login.php'">
+        <div class="login-icon">
             <i class="uil uil-user-circle"></i>
+            <?php if (isset($_SESSION['id_cliente'])): ?>
+                <!-- Menú desplegable visible solo si la sesión está activa -->
+                <div class="dropdown-menu">
+                    <a href="historial_compra.php">Historial de Compra</a>
+                    <a href="mi_perfil.php">Mi Perfil</a>
+                    <a href="logout.php">Cerrar Sesión</a>
+                </div>
+            <?php else: ?>
+                <script>
+                    document.querySelector('.login-icon').addEventListener('click', function () {
+                        window.location.href = 'login.php';
+                    });
+                </script>
+            <?php endif; ?>
         </div>
     </nav>
 
@@ -193,7 +236,6 @@
     <div id="products-container"></div>
 
     <script>
-        // Cargar y mostrar el contenido de products.html
         async function cargarProductos() {
             try {
                 const respuesta = await fetch('products.html');
@@ -211,7 +253,6 @@
     <div id="footer-container"></div>
 
     <script>
-        // Cargar y mostrar el contenido de footer.html
         async function cargarFooter() {
             try {
                 const respuesta = await fetch('footer.html');
