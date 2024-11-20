@@ -1,115 +1,89 @@
 <?php
-// Habilitar la visualización de errores para depuración
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
-
 require 'config/config.php';
 require 'config/database.php';
 
 $db = new Database();
 $con = $db->conectar();
 
-$errors = [];
-
+// Verifica si se ha enviado el formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = isset($_POST['email']) ? trim($_POST['email']) : null;
-    $password = isset($_POST['password']) ? trim($_POST['password']) : null;
+    $correo = filter_var($_POST['correo'], FILTER_SANITIZE_EMAIL);
+    $password = $_POST['password'];
 
-    // Validar que los campos no estén vacíos
-    if (!$email || !$password) {
-        $errors[] = "Por favor, completa ambos campos.";
-    } else {
-        // Buscar el usuario en la base de datos usando su correo electrónico
-        $sql = $con->prepare("SELECT u.id, u.password, u.activacion, c.nombres 
-                              FROM usuarios u 
-                              INNER JOIN clientes c ON u.id_cliente = c.id 
-                              WHERE c.email = ?");
-        $sql->execute([$email]);
-        $user = $sql->fetch(PDO::FETCH_ASSOC);
+    if (!empty($correo) && !empty($password)) {
+        // Consulta para buscar el usuario por correo
+        $sql = $con->prepare("
+            SELECT u.id, u.password, u.activacion, u.id_cliente, c.nombres, c.apellidos 
+            FROM usuarios u 
+            INNER JOIN clientes c ON u.id_cliente = c.id
+            WHERE c.email = ? LIMIT 1
+        ");
+        $sql->execute([$correo]);
+        $usuario = $sql->fetch(PDO::FETCH_ASSOC);
 
-        if ($user) {
-            // Verificar si el usuario está activado
-            if ($user['activacion'] == 0) {
-                $errors[] = "Tu cuenta no está activada. Por favor, verifica tu correo.";
-            } else {
-                // Verificar la contraseña
-                if (password_verify($password, $user['password'])) {
-                    // Iniciar sesión
-                    $_SESSION['usuario_id'] = $user['id'];
-                    $_SESSION['usuario_nombre'] = $user['nombres'];
+        if ($usuario) {
+            // Verifica si la cuenta está activada
+            if ($usuario['activacion'] == 1) {
+                // Verifica la contraseña
+                if (password_verify($password, $usuario['password'])) {
+                    // Configura las variables de sesión
+                    $_SESSION['id_usuario'] = $usuario['id'];
+                    $_SESSION['id_cliente'] = $usuario['id_cliente'];
+                    $_SESSION['nombre'] = $usuario['nombres'];
+                    $_SESSION['apellido'] = $usuario['apellidos'];
 
-                    // Redirigir a la página principal
-                    header('Location: index.php');
+                    // Redirige al usuario al carrito o página principal
+                    header('Location: detalles_compra.php');
                     exit;
                 } else {
-                    $errors[] = "La contraseña es incorrecta.";
+                    $error = "La contraseña es incorrecta.";
                 }
+            } else {
+                $error = "Tu cuenta no está activada.";
             }
         } else {
-            $errors[] = "El correo electrónico no está registrado.";
+            $error = "El correo no está registrado.";
         }
+    } else {
+        $error = "Por favor, completa todos los campos.";
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
 
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio de sesión</title>
+    <title>Iniciar Sesión</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .error-message {
-            color: red;
-            font-size: 0.875rem;
-        }
-    </style>
 </head>
-
 <body>
-    <header>
-        <div class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a href="index.php" class="navbar-brand"><strong>Tienda Online</strong></a>
+    <div class="container mt-5">
+        <h2 class="text-center">Iniciar Sesión</h2>
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger text-center">
+                <?php echo $error; ?>
             </div>
+        <?php endif; ?>
+        <form action="login.php" method="POST" class="mt-4">
+            <div class="mb-3">
+                <label for="correo" class="form-label">Correo Electrónico:</label>
+                <input type="email" name="correo" id="correo" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña:</label>
+                <input type="password" name="password" id="password" class="form-control" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            </div>
+        </form>
+        <div class="text-center mt-3">
+            <p>¿No tienes cuenta? <a href="registro.php">Regístrate aquí</a></p>
         </div>
-    </header>
-
-    <main>
-        <div class="container mt-4">
-            <h2>Inicia sesión</h2>
-
-            <!-- Mostrar errores -->
-            <?php if (!empty($errors)): ?>
-                <div class="alert alert-danger">
-                    <ul>
-                        <?php foreach ($errors as $error): ?>
-                            <li><?php echo $error; ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-
-            <!-- Formulario de inicio de sesión -->
-            <form class="row g-3" action="login.php" method="post" autocomplete="off">
-                <div class="col-md-6">
-                    <label for="email"><span class="text-danger">*</span>Correo Electrónico</label>
-                    <input type="email" name="email" id="email" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="password"><span class="text-danger">*</span>Contraseña</label>
-                    <input type="password" name="password" id="password" class="form-control" required>
-                </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Iniciar sesión</button>
-                </div>
-            </form>
-        </div>
-    </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

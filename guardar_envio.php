@@ -1,5 +1,10 @@
 <?php
+session_start();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require 'config/database.php';
+    $db = new Database();
+    $con = $db->conectar();
+
     $nombre = $_POST['nombre'];
     $apellidos = $_POST['apellidos'];
     $calle = $_POST['calle'];
@@ -9,29 +14,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $codigo_postal = $_POST['codigo_postal'];
     $correo = $_POST['correo'];
     $telefono = $_POST['telefono'];
-    $piso_departamento = $_POST['piso_departamento'];
-    $provincia = $_POST['provincia'];
+    $piso_departamento = $_POST['piso_departamento'] ?? null;
+    $provincia = $_POST['provincia'] ?? null;
 
-    // Conexión a la base de datos
-    $conn = new mysqli("localhost", "root", "", "e_commerce");
-
-    if ($conn->connect_error) {
-        die("Conexión fallida: " . $conn->connect_error);
-    }
-
-    $sql = "INSERT INTO envio (nombre, apellidos, calle, numero, pais, ciudad, codigo_postal, correo, telefono, piso_departamento, provincia)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssssssssss", $nombre, $apellidos, $calle, $numero, $pais, $ciudad, $codigo_postal, $correo, $telefono, $piso_departamento, $provincia);
-    
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true]);
+    $sql = $con->prepare("INSERT INTO envios (nombre, apellidos, calle, numero, pais, ciudad, codigo_postal, correo, telefono, piso_departamento, provincia)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    if ($sql->execute([$nombre, $apellidos, $calle, $numero, $pais, $ciudad, $codigo_postal, $correo, $telefono, $piso_departamento, $provincia])) {
+        $id_envio = $con->lastInsertId();
+        echo json_encode(['success' => true, 'id_envio' => $id_envio]);
     } else {
         echo json_encode(['success' => false]);
     }
-
-    $stmt->close();
-    $conn->close();
 }
 ?>

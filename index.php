@@ -87,7 +87,6 @@
   <div class="form-container">
     <h2>Datos de Envío</h2>
     <form id="shipping-form" action="guardar_envio.php" method="POST">
-      <!-- Campos del formulario de envío -->
       <label for="nombre">Nombre:</label>
       <input type="text" id="nombre" name="nombre" required>
       <label for="apellidos">Apellidos:</label>
@@ -122,22 +121,29 @@
     $productos = isset($_SESSION['carrito']['productos']) ? $_SESSION['carrito']['productos'] : null;
 
     $total = 0;
+    $detalles = [];
 
     if ($productos != null) {
         foreach ($productos as $id => $cantidad) {
-            $sql = $con->prepare("SELECT precio, descuento FROM zapatillas WHERE id = ?");
+            $sql = $con->prepare("SELECT nombre, precio, descuento FROM zapatillas WHERE id = ?");
             $sql->execute([$id]);
             $row = $sql->fetch(PDO::FETCH_ASSOC);
 
             $precio_descuento = $row['precio'] - ($row['precio'] * ($row['descuento'] / 100));
             $subtotal = $cantidad * $precio_descuento;
             $total += $subtotal;
+
+            $detalles[] = [
+                'id_producto' => $id,
+                'nombre' => $row['nombre'],
+                'precio' => $precio_descuento,
+                'cantidad' => $cantidad
+            ];
         }
     }
 
     $costo_envio = 10; // Costo de envío fijo
     $total += $costo_envio;
-
     $total = number_format($total, 2, '.', '');
     ?>
     <div class="summary-title">Resumen de Pago</div>
@@ -174,9 +180,27 @@
     },
     onApprove: function(data, actions) {
       return actions.order.capture().then(function(details) {
-        alert('Pago exitoso: ' + details.payer.name.given_name);
-        // Redirigir a la página de confirmación
-        window.location.href = 'confirmacion.php';
+        // Registro de datos en el servidor
+        const envioId = 1; // Cambia según el contexto, este debería ser dinámico.
+        const transactionId = details.id;
+
+        fetch('guardar_compra.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id_envio: envioId,
+            id_transaccion: transactionId
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Compra registrada con éxito.');
+            window.location.href = 'confirmacion.php';
+          } else {
+            alert('Error al registrar la compra.');
+          }
+        });
       });
     },
     onCancel: function(data) {
