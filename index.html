@@ -142,6 +142,19 @@
 </head>
 
 <body>
+    <div id="cookieBanner" style="position: fixed; bottom: 0; width: 100%; background: #f8f9fa; padding: 15px; text-align: center; border-top: 1px solid #ddd; display: none; z-index: 9999;">
+        <p style="margin: 0; font-size: 14px;">
+          Usamos cookies para mejorar tu experiencia en nuestro sitio web. Al continuar navegando, aceptas nuestra política de cookies.
+          <a href="politica_cookies.html" target="_blank" style="text-decoration: underline;">Leer más</a>
+        </p>
+        <button id="acceptCookies" style="margin-left: 10px; padding: 5px 10px; background: #007bff; color: #fff; border: none; cursor: pointer;">
+          Aceptar
+        </button>
+        <button id="rejectCookies" style="margin-left: 10px; padding: 5px 10px; background: #dc3545; color: #fff; border: none; cursor: pointer;">
+          Rechazar
+        </button>
+      </div>
+      
     <?php session_start(); ?>
     <!--- NAV BAR --->
     <nav class="nav">
@@ -274,6 +287,26 @@
 
     <script src="./assets/js/index.js"></script>
     <script src="assets/js/slider.js"></script>
+
+    <script>
+        // Mostrar el banner si no existe la cookie de consentimiento
+        if (!document.cookie.includes('consent=')) {
+          document.getElementById('cookieBanner').style.display = 'block';
+        }
+      
+        // Al aceptar cookies
+        document.getElementById('acceptCookies').addEventListener('click', function () {
+          document.cookie = "consent=accepted; path=/; max-age=" + 60 * 60 * 24 * 365; // 1 año
+          document.getElementById('cookieBanner').style.display = 'none';
+        });
+      
+        // Al rechazar cookies
+        document.getElementById('rejectCookies').addEventListener('click', function () {
+          document.cookie = "consent=rejected; path=/; max-age=" + 60 * 60 * 24 * 365; // 1 año
+          document.getElementById('cookieBanner').style.display = 'none';
+        });
+      </script>
+      
 </body>
 
 </html>
