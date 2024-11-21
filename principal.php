@@ -229,9 +229,6 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <div class="cart-icon" onclick="handleCartClick()">
             <i class="uil uil-shopping-cart"></i>
-            <span id="num_cart" class="badge bg-secondary">
-                <?php echo array_sum(array_column($_SESSION['carrito'], 'cantidad')); ?>
-            </span>
         </div>
         <div class="login-icon">
             <i class="uil uil-user-circle"></i>

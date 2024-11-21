@@ -1,5 +1,4 @@
 <?php
-
 require '../config/config.php';
 
 if (isset($_POST['id'])) {
@@ -11,7 +10,7 @@ if (isset($_POST['id'])) {
     if ($token == $token_tmp) {  
         // Si el producto ya existe en el carrito, incrementa su cantidad
         if (isset($_SESSION['carrito']['productos'][$id])) {
-            $_SESSION['carrito']['productos'][$id] += 1;
+            $_SESSION['carrito']['productos'][$id] += 1; // Incrementa la cantidad
         } else {    
             // Si no existe, agrega el producto al carrito con cantidad 1
             $_SESSION['carrito']['productos'][$id] = 1;
@@ -23,7 +22,8 @@ if (isset($_POST['id'])) {
             $totalProductos += $cantidad;
         }
 
-        $datos['numero'] = $totalProductos; // Devuelve el total de productos
+        // Devolver el número total de productos en el carrito
+        $datos['numero'] = $totalProductos;
         $datos['ok'] = true;
 
     } else {

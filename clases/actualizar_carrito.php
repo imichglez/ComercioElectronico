@@ -33,54 +33,37 @@ echo json_encode($datos);
 function agregar($id, $cantidad)
 {
     $res = 0;
-    if ($id > 0 && $cantidad > 0 && is_numeric($cantidad)) {
+    if ($id > 0 && $cantidad > 0) {
         if (isset($_SESSION['carrito']['productos'][$id])) {
+            $_SESSION['carrito']['productos'][$id] += $cantidad; // Incrementar la cantidad
+        } else {
             $_SESSION['carrito']['productos'][$id] = $cantidad;
-
-            $db = new Database();
-            $con = $db->conectar();
-            $sql = $con->prepare("SELECT precio, descuento FROM zapatillas WHERE id=? AND activo=1 LIMIT 1");
-            $sql->execute([$id]);
-            $row = $sql->fetch(PDO::FETCH_ASSOC);
-            $precio = $row['precio'];
-            $descuento = $row['descuento'];
-            $precio_desc = $precio - (($precio * $descuento) / 100);
-            $res = $cantidad * $precio_desc;
-
-            return $res;
         }
-    } else {
-        return $res;
     }
+    return $res;
 }
 
 function eliminar($id)
 {
+    $res = false;
     if ($id > 0) {
-        if (isset($_SESSION['carrito']['productos'][$id])) {
-            unset($_SESSION['carrito']['productos'][$id]); // Elimina el producto del carrito
-            return true;
-        }
+        unset($_SESSION['carrito']['productos'][$id]);
+        $res = true;
     }
-    return false;
+    return $res;
 }
 
 function calcularTotal()
 {
     $total = 0;
     if (isset($_SESSION['carrito']['productos'])) {
-        $db = new Database();
-        $con = $db->conectar();
-
         foreach ($_SESSION['carrito']['productos'] as $id => $cantidad) {
-            $sql = $con->prepare("SELECT precio, descuento FROM zapatillas WHERE id=? AND activo=1 LIMIT 1");
-            $sql->execute([$id]);
-            $row = $sql->fetch(PDO::FETCH_ASSOC);
-            $precio = $row['precio'];
-            $descuento = $row['descuento'];
-            $precio_desc = $precio - (($precio * $descuento) / 100);
-            $total += $cantidad * $precio_desc;
+            // Se puede implementar una consulta a base de datos para obtener el precio
+            // en lugar de usar un precio estático. Este es un ejemplo simplificado.
+            $precio = 100; // Aquí iría el precio del producto obtenido desde la DB.
+            $total += $cantidad * $precio;
         }
     }
     return $total;
 }
+?>
