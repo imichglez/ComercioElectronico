@@ -28,6 +28,14 @@ $resultados = $sql->fetchAll(PDO::FETCH_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
     <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main {
+            flex: 1;
+        }
         .nav {
             display: flex;
             justify-content: space-between;
@@ -41,9 +49,10 @@ $resultados = $sql->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .nav .logo {
-            font-size: 24px;
+            font-size: 30px;
             font-weight: bold;
             text-decoration: none;
+            color: #2c2c2c;
         }
 
         .nav .nav-links {
@@ -60,36 +69,38 @@ $resultados = $sql->fetchAll(PDO::FETCH_ASSOC);
             font-weight: 500;
         }
 
-        .nav .search-box {
-            display: flex;
-            align-items: center;
+        .cart-icon,
+        .login-icon {
+            position: relative;
+            font-size: 24px;
+            cursor: pointer;
         }
 
-        .nav .search-box input {
-            width: 200px;
-            padding: 5px;
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
             border: 1px solid #ddd;
-            border-radius: 3px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
         }
 
-        .nav .search-box button {
-            margin-left: 5px;
-            padding: 5px 10px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 3px;
+        .dropdown-menu a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
         }
 
-        .nav .cart-icon {
-            font-size: 24px;
-            cursor: pointer;
-            margin-right: 20px;
+        .dropdown-menu a:hover {
+            background: #f8f9fa;
         }
 
-        .nav .login-icon {
-            font-size: 24px;
-            cursor: pointer;
+        .login-icon:hover .dropdown-menu {
+            display: block;
         }
 
         .card {
@@ -98,15 +109,9 @@ $resultados = $sql->fetchAll(PDO::FETCH_ASSOC);
             transition: transform 0.3s ease;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
         .card img {
-            height: 200px;
+            height: 250px;
             object-fit: cover;
-            border-bottom: 1px solid #ddd;
         }
 
         .card-title {
@@ -118,8 +123,6 @@ $resultados = $sql->fetchAll(PDO::FETCH_ASSOC);
             background-color: #f8f9fa;
             padding: 20px;
             text-align: center;
-            margin-top: 20px;
-            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
         }
 
         footer p {
@@ -143,11 +146,20 @@ $resultados = $sql->fetchAll(PDO::FETCH_ASSOC);
                 <button type="submit" class="btn btn-primary">Buscar</button>
             </form>
         </div>
-        <div class="cart-icon" onclick="window.location.href='checkout.php'">
+        <div class="cart-icon" onclick="handleCartClick()">
             <i class="uil uil-shopping-cart"></i>
         </div>
-        <div class="login-icon" onclick="window.location.href='login.php'">
+        <div class="login-icon">
             <i class="uil uil-user-circle"></i>
+            <?php if (isset($_SESSION['id_cliente'])): ?>
+                <div class="dropdown-menu">
+                    <a href="historial_compra.php">Mi Historial de Compras</a>
+                    <a href="mi_perfil.php">Mi Perfil</a>
+                    <a href="logout.php">Cerrar Sesión</a>
+                </div>
+            <?php else: ?>
+                <script>document.querySelector('.login-icon').onclick = () => window.location.href = 'login.php';</script>
+            <?php endif; ?>
         </div>
     </nav>
 
@@ -172,7 +184,10 @@ $resultados = $sql->fetchAll(PDO::FETCH_ASSOC);
                             <div class="card-body text-center">
                                 <h5 class="card-title"><?php echo $producto['nombre']; ?></h5>
                                 <p class="card-text text-muted">$<?php echo number_format($producto['precio'], 2, '.', ','); ?></p>
-                                <a href="detalles.php?id=<?php echo $id; ?>&token=<?php echo $token; ?>" class="btn btn-primary btn-sm">Ver Detalles</a>
+                                <div class="d-flex justify-content-between">
+                                    <a href="detalles.php?id=<?php echo $id; ?>&token=<?php echo $token; ?>" class="btn btn-primary btn-sm">Ver Detalles</a>
+                                    <button class="btn btn-outline-success btn-sm" onclick="addProducto(<?php echo $id; ?>)">Agregar al carrito</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -188,6 +203,27 @@ $resultados = $sql->fetchAll(PDO::FETCH_ASSOC);
         <p>&copy; <?php echo date("Y"); ?> Street Kicks. Todos los derechos reservados.</p>
     </footer>
 
+    <script>
+        function handleCartClick() {
+            window.location.href = 'checkout.php';
+        }
+
+        function addProducto(id) {
+            fetch('carrito_agregar.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    alert('Producto agregado al carrito');
+                } else {
+                    alert('Error al agregar el producto');
+                }
+            });
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
