@@ -1,8 +1,27 @@
 <?php
+session_start();
 require 'config/config.php';
 require 'config/database.php';
 $db = new Database();
 $con = $db->conectar();
+
+// Manejo de carrito persistente
+if (isset($_SESSION['id_cliente'])) {
+    $id_cliente = $_SESSION['id_cliente'];
+
+    // Recuperar carrito de la base de datos
+    $sql = $con->prepare("SELECT contenido FROM carrito WHERE id_cliente = ?");
+    $sql->execute([$id_cliente]);
+    $carritoData = $sql->fetch(PDO::FETCH_ASSOC);
+
+    if ($carritoData) {
+        $_SESSION['carrito'] = json_decode($carritoData['contenido'], true);
+    } else {
+        $_SESSION['carrito'] = [];
+    }
+} else {
+    $_SESSION['carrito'] = $_SESSION['carrito'] ?? [];
+}
 
 // Aplicar filtros si existen
 $where = "activo=1";
@@ -100,14 +119,14 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
             font-weight: 500;
         }
 
-        .nav .cart-icon {
+        .cart-icon,
+        .login-icon {
+            position: relative;
             font-size: 24px;
             cursor: pointer;
-            margin-right: 20px;
-            position: relative;
         }
 
-        .nav .cart-icon .badge {
+        .cart-icon .badge {
             position: absolute;
             top: -5px;
             right: -10px;
@@ -166,6 +185,32 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
             padding: 20px 0;
             text-align: center;
         }
+
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .dropdown-menu a:hover {
+            background: #f8f9fa;
+        }
+
+        .login-icon:hover .dropdown-menu {
+            display: block;
+        }
     </style>
 </head>
 
@@ -182,14 +227,21 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                 <button type="submit" class="btn btn-primary">Buscar</button>
             </form>
         </div>
-        <div class="cart-icon" onclick="window.location.href='checkout.php'">
+        <div class="cart-icon" onclick="handleCartClick()">
             <i class="uil uil-shopping-cart"></i>
             <span id="num_cart" class="badge bg-secondary">
-                <?php echo isset($_SESSION['carrito']['productos']) ? array_sum($_SESSION['carrito']['productos']) : 0; ?>
+                <?php echo array_sum(array_column($_SESSION['carrito'], 'cantidad')); ?>
             </span>
         </div>
-        <div class="login-icon" onclick="window.location.href='login.php'">
+        <div class="login-icon">
             <i class="uil uil-user-circle"></i>
+            <?php if (isset($_SESSION['id_cliente'])): ?>
+                <div class="dropdown-menu">
+                    <a href="historial_compra.php">Historial de Compra</a>
+                    <a href="mi_perfil.php">Mi Perfil</a>
+                    <a href="logout.php">Cerrar Sesión</a>
+                </div>
+            <?php endif; ?>
         </div>
     </nav>
 
@@ -279,8 +331,8 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                                             <?php endif; ?>
                                         </p>
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <a href="detalles.php?id=<?php echo $row['id']; ?>&token=<?php echo hash_hmac('sha1', $row['id'], KEY_TOKEN); ?>" class="btn btn-primary btn-sm">Comprar</a>
-                                            <button class="btn btn-outline-success btn-sm" type="button" onclick="addProducto(<?php echo $row['id']; ?>, '<?php echo hash_hmac('sha1', $row['id'], KEY_TOKEN); ?>')">Agregar al carrito</button>
+                                            <a href="detalles.php?id=<?php echo $row['id']; ?>&token=<?php echo hash_hmac('sha1', $row['id'], KEY_TOKEN); ?>" class="btn btn-primary btn-sm">Comprar ahora</a>
+                                            <button class="btn btn-outline-success btn-sm" type="button" onclick="addProducto(<?php echo $row['id']; ?>)">Agregar al carrito</button>
                                         </div>
                                     </div>
                                 </div>
@@ -297,26 +349,30 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
     </footer>
 
     <script>
-        function addProducto(id, token) {
-            let url = 'clases/carrito.php';
-            let formData = new FormData();
-            formData.append('id', id);
-            formData.append('token', token);
+        function handleCartClick() {
+            <?php if (isset($_SESSION['id_cliente'])): ?>
+                window.location.href = 'checkout.php';
+            <?php else: ?>
+                window.location.href = 'login.php';
+            <?php endif; ?>
+        }
 
-            fetch(url, {
+        function addProducto(id) {
+            fetch('carrito_agregar.php', {
                 method: 'POST',
-                body: formData,
-                mode: 'cors'
-            }).then(response => response.json())
-                .then(data => {
-                    if (data.ok) {
-                        let elemento = document.getElementById("num_cart");
-                        elemento.innerHTML = data.numero;
-                    }
-                });
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    document.getElementById('num_cart').textContent = data.numero;
+                }
+            });
         }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
