@@ -15,30 +15,41 @@ if ($id == '' || $token == '') {
     $token_tmp = hash_hmac('sha1', $id, KEY_TOKEN);
 
     if ($token == $token_tmp) {
-        $sql = $con->prepare("SELECT count(id) FROM zapatillas WHERE id=? and activo=1");
+        $sql = $con->prepare("SELECT nombre, descripcion, precio, descuento, id_categoria FROM zapatillas WHERE id=? and activo=1 LIMIT 1");
         $sql->execute([$id]);
-        if ($sql->fetchColumn() > 0) {
-            $sql = $con->prepare("SELECT nombre, descripcion, precio, descuento, id_categoria FROM zapatillas WHERE id=? and activo=1 LIMIT 1");
-            $sql->execute([$id]);
-            $row = $sql->fetch(PDO::FETCH_ASSOC);
-            $nombre = $row['nombre'];
-            $descripcion = $row['descripcion'];
-            $precio = $row['precio'];
-            $descuento = $row['descuento'];
-            $id_categoria = $row['id_categoria'];
-            $precio_desc = $precio - (($precio * $descuento) / 100);
+        $row = $sql->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            echo 'Producto no encontrado';
+            exit;
+        }
 
-            // Determinar la carpeta principal y subcarpeta
-            $carpeta_principal = in_array($id_categoria, [1, 2]) ? 'hombre' : (in_array($id_categoria, [3, 4]) ? 'mujer' : 'niños');
-            $subcarpeta = in_array($id_categoria, [1, 3, 5]) ? 'casual' : 'running';
+        $nombre = $row['nombre'];
+        $descripcion = $row['descripcion'];
+        $precio = $row['precio'];
+        $descuento = $row['descuento'];
+        $precio_desc = $precio - (($precio * $descuento) / 100);
 
-            // Ruta de la imagen
-            $imagen = "imagenes/$carpeta_principal/$subcarpeta/$id/prueba.png";
+        // Consultar tallas y stock
+        $sql = $con->prepare("SELECT talla, stock FROM stock_tallas WHERE id_producto = ?");
+        $sql->execute([$id]);
+        $tallas = $sql->fetchAll(PDO::FETCH_ASSOC);
 
-            // Verificar si la imagen existe
-            if (!file_exists($imagen)) {
-                $imagen = "imagenes/nofoto.avif";
+        // Comprobar si todas las tallas están agotadas
+        $agotado = true;
+        foreach ($tallas as $talla) {
+            if ($talla['stock'] > 0) {
+                $agotado = false;
+                break;
             }
+        }
+
+        // Construcción de la ruta de la imagen
+        $carpeta_principal = in_array($row['id_categoria'], [1, 2]) ? 'hombre' : (in_array($row['id_categoria'], [3, 4]) ? 'mujer' : 'niños');
+        $subcarpeta = in_array($row['id_categoria'], [1, 3, 5]) ? 'casual' : 'running';
+        $imagen = "imagenes/$carpeta_principal/$subcarpeta/$id/prueba.png";
+
+        if (!file_exists($imagen)) {
+            $imagen = "imagenes/nofoto.avif"; // Imagen por defecto si no se encuentra la imagen del producto
         }
     } else {
         echo 'Error al procesar la petición';
@@ -55,7 +66,6 @@ if ($id == '' || $token == '') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $nombre; ?> - Tienda Online</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
     <style>
@@ -117,7 +127,6 @@ if ($id == '' || $token == '') {
             margin-top: 30px;
         }
 
-        /* Navbar styles */
         .nav {
             display: flex;
             justify-content: space-between;
@@ -134,6 +143,7 @@ if ($id == '' || $token == '') {
             font-size: 24px;
             font-weight: bold;
             text-decoration: none;
+            color: #2c2c2c;
         }
 
         .nav .nav-links {
@@ -150,34 +160,9 @@ if ($id == '' || $token == '') {
             font-weight: 500;
         }
 
-        .nav .search-box {
-            display: flex;
-            align-items: center;
-        }
-
-        .nav .search-box input {
-            width: 200px;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-        }
-
-        .nav .search-box button {
-            margin-left: 5px;
-            padding: 5px 10px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 3px;
-        }
-
-        .nav .cart-icon {
-            font-size: 24px;
-            cursor: pointer;
-            margin-right: 20px;
-        }
-
-        .nav .login-icon {
+        .cart-icon,
+        .login-icon {
+            position: relative;
             font-size: 24px;
             cursor: pointer;
         }
@@ -186,12 +171,12 @@ if ($id == '' || $token == '') {
             background-color: #f8f9fa;
             padding: 20px 0;
             text-align: center;
+            margin-top: auto;
         }
     </style>
 </head>
 
 <body>
-    <!-- Navbar -->
     <nav class="nav">
         <a href="index.html" class="logo">Street Kicks</a>
         <ul class="nav-links">
@@ -204,27 +189,35 @@ if ($id == '' || $token == '') {
                 <button type="submit" class="btn btn-primary">Buscar</button>
             </form>
         </div>
-        <div class="cart-icon" onclick="window.location.href='checkout.php'">
+        <div class="cart-icon" onclick="handleCartClick()">
             <i class="uil uil-shopping-cart"></i>
         </div>
-        <div class="login-icon" onclick="window.location.href='login.php'">
+        <div class="login-icon">
             <i class="uil uil-user-circle"></i>
+            <?php if (isset($_SESSION['id_cliente'])): ?>
+                <div class="dropdown-menu">
+                    <a href="historial_compra.php">Historial de Compra</a>
+                    <a href="mi_perfil.php">Mi Perfil</a>
+                    <a href="logout.php">Cerrar Sesión</a>
+                </div>
+            <?php else: ?>
+                <script>
+                    document.querySelector('.login-icon').onclick = () => {
+                        window.location.href = 'login.php';
+                    };
+                </script>
+            <?php endif; ?>
         </div>
     </nav>
 
     <main>
         <div class="container product-container">
             <div class="row">
-                <!-- Imagen del producto -->
                 <div class="col-md-6">
                     <img src="<?php echo $imagen; ?>" class="product-image" alt="<?php echo $nombre; ?>">
                 </div>
-
-                <!-- Información del producto -->
                 <div class="col-md-6">
                     <h2 class="product-title"><?php echo $nombre; ?></h2>
-
-                    <!-- Precios -->
                     <?php if ($descuento > 0) { ?>
                         <p>
                             <span class="price-original"><?php echo MONEDA . number_format($precio, 2, '.', ','); ?></span>
@@ -238,31 +231,55 @@ if ($id == '' || $token == '') {
                             <span class="price"><?php echo MONEDA . number_format($precio, 2, '.', ','); ?></span>
                         </h2>
                     <?php } ?>
-
-                    <!-- Descripción -->
                     <p class="lead"><?php echo $descripcion; ?></p>
 
-                    <!-- Botones -->
-                    <div class="d-grid gap-3 col-10 mx-auto">
-                        <button class="btn btn-primary btn-lg" type="button" onclick="window.location.href='index.php'">Comprar ahora</button>
-                        <button class="btn btn-outline-primary btn-lg" type="button" onclick="addProducto(<?php echo $id; ?>, '<?php echo $token_tmp; ?>')">Agregar al carrito</button>
-                    </div>
+                    <!-- Mostrar Producto Agotado si todas las tallas están agotadas -->
+                    <?php if ($agotado): ?>
+                        <p class="text-danger"><strong>Producto Agotado</strong></p>
+                    <?php else: ?>
+                        <!-- Selector de Talla -->
+                        <div class="form-group mb-4">
+                            <label for="talla">Selecciona una talla:</label>
+                            <select id="talla" class="form-select">
+                                <?php foreach ($tallas as $talla): ?>
+                                    <option value="<?php echo $talla['talla']; ?>" <?php echo $talla['stock'] <= 0 ? 'disabled' : ''; ?>>
+                                        <?php echo $talla['talla']; ?> <?php echo $talla['stock'] <= 0 ? '(Agotado)' : ''; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-grid gap-3 col-10 mx-auto mt-4">
+                            <button class="btn btn-primary btn-lg" type="button" onclick="window.location.href='index.php'">Comprar ahora</button>
+                            <button class="btn btn-outline-primary btn-lg" type="button" onclick="addProducto(<?php echo $id; ?>, '<?php echo $token_tmp; ?>')">Agregar al carrito</button>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer>
         <p>&copy; <?php echo date("Y"); ?> Street Kicks. Todos los derechos reservados.</p>
     </footer>
 
     <script>
+        function handleCartClick() {
+            <?php if (isset($_SESSION['id_cliente'])): ?>
+                window.location.href = 'checkout.php';
+            <?php else: ?>
+                window.location.href = 'login.php';
+            <?php endif; ?>
+        }
+
         function addProducto(id, token) {
+            const talla = document.getElementById("talla").value;
             let url = 'clases/carrito.php';
             let formData = new FormData();
             formData.append('id', id);
             formData.append('token', token);
+            formData.append('talla', talla);
 
             fetch(url, {
                 method: 'POST',
