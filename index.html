@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Street Kicks - Shoes Store </title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <!--- FONT --->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+    </style>
+
+    <!--- CSS --->
+    <link rel="stylesheet" href="./assets/css/index.css">
+    <link rel="stylesheet" href="./assets/css/navbar.css">
+    <link rel="stylesheet" href="./assets/css/slider.css">
+    <link rel="stylesheet" href="./assets/css/products.css">
+
+    <!--- Favicon -->
+    <link rel="shortcut icon" href="./assets/img/favicon.png" type="image">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+</head>
+<body>
+    <!--- NAV BAR --->
+    <nav class="nav">
+        <a href="#" class="logo" href="#" >Street Kicks</a>
+        <ul class="nav-links">
+          <i class="uil uil-times navCloseBtn"></i>
+          <li><a href="#">Home</a></li>
+          <li><a href="#mujer1">Mujer</a></li>
+          <li><a href="#hombre1">Hombre</a></li>
+          <li><a href="#niños1">Niños</a></li>
+          <li><a href="">Catálogo</a></li>
+        </ul>
+        <i class="uil uil-search search-icon" id="searchIcon"></i>
+        <!--<i class="uil uil-shopping-cart cart-icon" id="cartIcon"></i> -->
+        <div class="search-box">
+          <i class="uil uil-search search-icon"></i>
+          <input type="text" placeholder="Buscar productos" />
+        </div>
+      </nav>
+
+    <!--- TOP SLIDER --->
+    <section class="top">
+        <section class="top_slider">
+            <div class="slider-wrapper">
+                <div class="slider">
+                    <img id="slide-1" src="./assets/img/slider/slider1.png" alt="3D rendering of an imaginary orange planet in space" />
+                    <img id="slide-2" src="./assets/img/slider/slider2.png" alt="3D rendering of an imaginary green planet in space" />
+                    <img id="slide-3" src="./assets/img/slider/slider3.png" alt="3D rendering of an imaginary blue planet in space" />
+                </div>
+                <div class="slider-nav">
+                    <a href="#slide-1"></a>
+                    <a href="#slide-2"></a>
+                    <a href="#slide-3"></a>
+                </div>
+            </div>
+        </section>
+    
+        <section class="top_cards">
+            <div class="card1">
+                <p class="p">10% de descuento en</p>
+                <p class="p">productos seleccionados</p>
+                <p class="small_text">Renueva tus favoritos y ahorra mientras te llevas lo mejor</p>
+                <p class="small_text2">¡Solo por tiempo limitado!</p>
+                <button type="button" class="btn btn-dark">Compra aquí</button>
+            </div>
+            <div class="card2">
+                <p class="p">¡Se acerca el</p>
+                <p class="p">BLACK FRIDAY!</p>
+                <p class="small_text">Aprovecha todas las ofertas</p>
+                <p class="small_text2">especiales solo para ti</p>
+                <button type="button" class="btn btn-light">Compra aquí</button>
+            </div>
+        </section>
+    </section>
+
+    <!--- SHOPPING CART --->
+
+    <section class="shopping_cart">
+        <div class="border">
+            <i class="uil uil-shopping-cart cart-icon" id="cartIcon" onclick="openCart()"></i>
+        </div>
+    </section>
+    
+    <script>
+        function openCart() {
+            window.open('cart.html', '_blank');
+        }
+    </script>    
+
+    <!--- PRODUCTS --->
+    <h3 id="buy">Compra por categoría</h3>
+    <p class="cat1" id="mujer1">Mujer</p>
+
+    <div id="products-container"></div>
+
+    <script>
+        // Cargar y mostrar el contenido de products.html
+        async function cargarProductos() {
+            try {
+                const respuesta = await fetch('products.html');
+                const contenido = await respuesta.text();
+                document.getElementById('products-container').innerHTML = contenido;
+            } catch (error) {
+                console.error("Error al cargar el archivo:", error);
+            }
+        }
+
+        cargarProductos();
+    </script>
+
+    <!--- FOOTER --->
+
+    <div id="footer-container"></div>
+
+    <script>
+        // Cargar y mostrar el contenido de footer.html
+        async function cargarFooter() {
+            try {
+                const respuesta = await fetch('footer.html');
+                const contenido = await respuesta.text();
+                document.getElementById('footer-container').innerHTML = contenido;
+            } catch (error) {
+                console.error("Error al cargar el archivo:", error);
+            }
+        }
+
+        cargarFooter();
+    </script>
+
+    <!--- JS --->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    
+    <script src="./assets/js/index.js"></script>
+    <script src="assets/js/slider.js"></script>
+</body>
+</html>
