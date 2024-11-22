@@ -1,5 +1,6 @@
 <?php
 
+session_start();
 require 'config/config.php';
 require 'config/database.php';
 $db = new Database();
@@ -25,10 +26,29 @@ if ($productos != null) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrito de Compras</title>
+    <title>Street Kicks - Carrito de Compras</title>
+    <link rel="icon" href="assets/img/favicon.png" type="image/x-icon">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
     <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: auto;
+        }
+
         .table {
             margin-top: 20px;
             border-collapse: collapse;
@@ -56,11 +76,106 @@ if ($productos != null) {
             font-weight: bold;
             text-align: right;
         }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav .logo {
+            font-size: 30px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #2c2c2c;
+        }
+
+        .nav .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 15px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box input {
+            width: 250px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .search-box button {
+            margin-left: 5px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+        }
+
+        .cart-icon,
+        .login-icon {
+            font-size: 24px;
+            cursor: pointer;
+            position: relative;
+        }
     </style>
 </head>
 
 <body>
+    <!-- Barra de navegación -->
+    <nav class="nav">
+        <a href="index.html" class="logo">Street Kicks</a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="principal.php">Catálogo</a></li>
+        </ul>
+        <div class="search-box">
+            <form action="buscar.php" method="GET">
+                <input type="text" name="query" placeholder="Buscar productos" required>
+                <button type="submit">Buscar</button>
+            </form>
+        </div>
+        <div class="cart-icon" onclick="window.location.href='checkout.php'">
+            <i class="uil uil-shopping-cart"></i>
+        </div>
+        <div class="login-icon">
+            <i class="uil uil-user-circle"></i>
+            <?php if (isset($_SESSION['id_cliente'])): ?>
+                <div class="dropdown-menu">
+                    <a href="historial_compra.php">Historial de Compra</a>
+                    <a href="mi_perfil.php">Mi Perfil</a>
+                    <a href="logout.php">Cerrar Sesión</a>
+                </div>
+            <?php else: ?>
+                <script>
+                    document.querySelector('.login-icon').onclick = () => {
+                        window.location.href = 'login.php';
+                    };
+                </script>
+            <?php endif; ?>
+        </div>
+    </nav>
 
+    <!-- Contenido principal -->
     <main>
         <div class="container">
             <div class="table-responsive">
@@ -117,11 +232,16 @@ if ($productos != null) {
             </div>
             <div class="row">
                 <div class="col-md-5 offset-md-7 d-grid gap-2">
-                <button class="btn btn-primary btn-lg" onclick="window.location.href='index.php'">Realizar pago</button>
+                    <button class="btn btn-primary btn-lg" onclick="window.location.href='index.php'">Realizar pago</button>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; <?php echo date("Y"); ?> Street Kicks. Todos los derechos reservados.</p>
+    </footer>
 
     <!-- Modal -->
     <div class="modal fade" id="eliminaModal" tabindex="-1" aria-labelledby="eliminaModalLabel" aria-hidden="true">
@@ -140,13 +260,14 @@ if ($productos != null) {
         </div>
     </div>
 
+    <!-- Scripts -->
     <script>
         let eliminaModal = document.getElementById('eliminaModal');
         eliminaModal.addEventListener('show.bs.modal', function(event) {
-            let button = event.relatedTarget; // Botón que abrió el modal
-            let id = button.getAttribute('data-bs-id'); // Obtiene el ID del producto
-            let buttonElimina = document.getElementById('btn-elimina'); // Botón dentro del modal
-            buttonElimina.value = id; // Asigna el ID al botón dentro del modal
+            let button = event.relatedTarget;
+            let id = button.getAttribute('data-bs-id');
+            let buttonElimina = document.getElementById('btn-elimina');
+            buttonElimina.value = id;
         });
 
         function actualizaCantidad(cantidad, id) {
@@ -175,8 +296,8 @@ if ($productos != null) {
         }
 
         function eliminar() {
-            let botonElimina = document.getElementById('btn-elimina'); // Botón dentro del modal
-            let id = botonElimina.value; // Obtén el ID del producto
+            let botonElimina = document.getElementById('btn-elimina');
+            let id = botonElimina.value;
 
             let url = 'clases/actualizar_carrito.php';
             let formData = new FormData();
@@ -197,14 +318,13 @@ if ($productos != null) {
                         let totalElement = document.getElementById('total');
                         totalElement.innerHTML = data.total;
 
-                        let modal = bootstrap.Modal.getInstance(eliminaModal); // Instancia del modal
-                        modal.hide(); // Cierra el modal
+                        let modal = bootstrap.Modal.getInstance(eliminaModal);
+                        modal.hide();
                     }
                 })
                 .catch(error => console.error('Error al eliminar el producto:', error));
         }
     </script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

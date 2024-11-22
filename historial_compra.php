@@ -26,8 +26,12 @@ $compras = $sql->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historial de Compras</title>
+    <title>Street Kicks - Historial de Compras</title>
+    <!-- Favicon -->
+    <link rel="icon" href="assets/img/favicon.png" type="image/x-icon">
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Unicons CSS -->
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
     <style>
         html {

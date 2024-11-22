@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Opciones de Envío y Pago</title>
+  <title>Street Kicks -Envío y Pago</title>
+  <link rel="icon" href="assets/img/favicon.png" type="image/x-icon">
   <script src="https://www.paypal.com/sdk/js?client-id=AR8xACZzL1pYEHoqxITx1YkVoDPQjE3GNOh6T0lV0CPNkT-YtNO6BgowOsDHKiaZqghMKk3I2ckApAdq"></script>
   <style>
     body {
