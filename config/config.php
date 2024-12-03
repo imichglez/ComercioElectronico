@@ -1,7 +1,7 @@
 <?php
 
 define("KEY_TOKEN", "ABCdef123@--");
-define("MONEDA", "$");
+define("MONEDA", "€");
 
 // Iniciar la sesión solo si no está ya activa
 if (session_status() === PHP_SESSION_NONE) {
