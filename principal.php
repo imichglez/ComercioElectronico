@@ -321,11 +321,11 @@ $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
                                         <h5 class="card-title"><?php echo $row['nombre']; ?></h5>
                                         <p class="card-text">
                                             <?php if ($row['descuento'] > 0): ?>
-                                                <span class="precio-original">$<?php echo number_format($row['precio'], 2, '.', ','); ?></span>
-                                                <span class="precio-descuento">$<?php echo number_format($row['precio'] - ($row['precio'] * $row['descuento'] / 100), 2, '.', ','); ?></span>
+                                                <span class="precio-original">€<?php echo number_format($row['precio'], 2, '.', ','); ?></span>
+                                                <span class="precio-descuento">€<?php echo number_format($row['precio'] - ($row['precio'] * $row['descuento'] / 100), 2, '.', ','); ?></span>
                                                 <span class="badge-descuento"><?php echo $row['descuento']; ?>% de descuento</span>
                                             <?php else: ?>
-                                                <span class="precio-descuento">$<?php echo number_format($row['precio'], 2, '.', ','); ?></span>
+                                                <span class="precio-descuento">€<?php echo number_format($row['precio'], 2, '.', ','); ?></span>
                                             <?php endif; ?>
                                         </p>
                                         <div class="d-flex justify-content-between align-items-center">

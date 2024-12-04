@@ -183,7 +183,7 @@ $resultados = $sql->fetchAll(PDO::FETCH_ASSOC);
                             <img src="<?php echo $imagen; ?>" class="card-img-top" alt="<?php echo $producto['nombre']; ?>">
                             <div class="card-body text-center">
                                 <h5 class="card-title"><?php echo $producto['nombre']; ?></h5>
-                                <p class="card-text text-muted">$<?php echo number_format($producto['precio'], 2, '.', ','); ?></p>
+                                <p class="card-text text-muted">€<?php echo number_format($producto['precio'], 2, '.', ','); ?></p>
                                 <div class="d-flex justify-content-between">
                                     <a href="detalles.php?id=<?php echo $id; ?>&token=<?php echo $token; ?>" class="btn btn-primary btn-sm">Ver Detalles</a>
                                     <button class="btn btn-outline-success btn-sm" onclick="addProducto(<?php echo $id; ?>)">Agregar al carrito</button>
